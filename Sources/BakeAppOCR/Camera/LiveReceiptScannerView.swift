@@ -42,7 +42,7 @@ public struct LiveReceiptScannerView: View {
 
     private var scanner: some View {
         ZStack {
-            DataScannerRepresentable { text in
+            DataScannerRepresentable(languages: configuration.recognitionLanguages ?? []) { text in
                 accumulator.add(text)
             }
             .ignoresSafeArea()
@@ -107,11 +107,20 @@ public struct LiveReceiptScannerView: View {
 
 /// Bridges `DataScannerViewController` into SwiftUI.
 private struct DataScannerRepresentable: UIViewControllerRepresentable {
+    let languages: [String]
     let onRecognized: (String) -> Void
 
     func makeUIViewController(context: Context) -> DataScannerViewController {
+        // Like the still path, drop languages this device cannot scan. Asking
+        // for a language this device does not have would otherwise leave an
+        // empty set, so fall back to the unrestricted default.
+        let supported = Set(DataScannerViewController.supportedTextRecognitionLanguages)
+        let usable = languages.filter(supported.contains)
+        let dataTypes: Set<DataScannerViewController.RecognizedDataType> =
+            usable.isEmpty ? [.text()] : [.text(languages: usable)]
+
         let controller = DataScannerViewController(
-            recognizedDataTypes: [.text()],
+            recognizedDataTypes: dataTypes,
             qualityLevel: .accurate,
             recognizesMultipleItems: true,
             isHighFrameRateTrackingEnabled: false,

@@ -12,3 +12,6 @@ Package.resolved
 xcuserdata/
 DerivedData/
 *.xcuserstate
+
+## Example app project (tracked on purpose)
+!Examples/**/*.xcodeproj

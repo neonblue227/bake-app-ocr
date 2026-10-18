@@ -69,6 +69,10 @@ than Vision itself, so lowering the floor is a one-line change in
 Two ready-made SwiftUI views. Both are iOS-only and both need
 `NSCameraUsageDescription` in your `Info.plist`.
 
+`Examples/ReceiptScannerDemo` is a small iOS app that exercises both, if you
+would rather tap through them than wire them up first. See
+[GETTING_STARTED.md](GETTING_STARTED.md).
+
 ### Still capture — best accuracy
 
 ```swift
@@ -230,9 +234,12 @@ Being explicit about what this does *not* do:
   (net, ex-tax, rounded), the parser picks the reading closest to
   `subtotal + tax`. It can still miss a tax value when the label and the number
   are split oddly across lines.
-- **English/Latin layouts only**, with decimal-point or decimal-comma money.
-  The Vision language list is configurable via
-  `ReceiptOCR.Configuration.recognitionLanguages`.
+- **OCR reads Thai and English** (`th-TH`, `en-US` by default, configurable via
+  `ReceiptOCR.Configuration.recognitionLanguages`). Thai needs iOS 17 /
+  macOS 14 and the accurate pass, so `preferSpeedOverAccuracy` reads English
+  only. **The parser's labels are still English-only**, so a Thai receipt's
+  text lands in `rawLines` but Thai-labelled totals and order numbers are not
+  extracted.
 - **The still camera reads only what is framed.** A receipt taller than the view
   needs `LiveReceiptScannerView`, or two captures.
 - **Live scanning is order-sensitive.** Lines are ordered by when they were first

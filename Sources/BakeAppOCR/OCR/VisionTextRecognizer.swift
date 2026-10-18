@@ -20,7 +20,13 @@ struct VisionTextRecognizer {
             request.minimumTextHeight = minimumTextHeight
         }
         if let recognitionLanguages, !recognitionLanguages.isEmpty {
-            request.recognitionLanguages = recognitionLanguages
+            // An unsupported code (Thai before iOS 17, or Thai with `.fast`)
+            // makes the request fail, so keep only what this system can read.
+            let supported = Set((try? request.supportedRecognitionLanguages()) ?? [])
+            let usable = recognitionLanguages.filter(supported.contains)
+            if !usable.isEmpty {
+                request.recognitionLanguages = usable
+            }
         }
 
         let handler = VNImageRequestHandler(cgImage: image, options: [:])

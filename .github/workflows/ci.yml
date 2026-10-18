@@ -60,3 +60,27 @@ jobs:
             -destination 'generic/platform=iOS' \
             -derivedDataPath "$RUNNER_TEMP/DerivedData" \
             CODE_SIGNING_ALLOWED=NO
+
+  # The example app carries a real .xcodeproj, and an Xcode project nobody
+  # compiles is a project that rots. Runs on macos-15 because the project is in
+  # the Xcode 16 format (objectVersion 77, filesystem-synchronised groups).
+  # `-target` rather than `-scheme` because there is no checked-in shared scheme.
+  demo-app:
+    name: Example app build
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Xcode version
+        run: xcodebuild -version
+
+      - name: Build ReceiptScannerDemo
+        run: |
+          xcodebuild build \
+            -project Examples/ReceiptScannerDemo/ReceiptScannerDemo.xcodeproj \
+            -target ReceiptScannerDemo \
+            -sdk iphonesimulator \
+            -configuration Debug \
+            -derivedDataPath "$RUNNER_TEMP/DemoDerivedData" \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO

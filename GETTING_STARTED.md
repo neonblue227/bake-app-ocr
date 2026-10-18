@@ -92,6 +92,31 @@ swift run ReceiptInspector --json ~/Desktop/receipt.jpg    # JSON
 swift run ReceiptInspector --lines receipt.txt             # skip OCR
 ```
 
+## Try the camera
+
+`Examples/ReceiptScannerDemo` is a small iOS app that exercises all three entry
+points: the still camera, the live scanner, and a photo from the library.
+
+```bash
+open Examples/ReceiptScannerDemo/ReceiptScannerDemo.xcodeproj
+```
+
+Choose a device and run. It needs a real device for the camera — the Simulator
+has none — but **Choose from Photos** works there, so you can still check the
+parsing without one. The project already has a development team set, so signing
+may just work; otherwise pick your own under *Signing & Capabilities*.
+
+Every scan prints the raw OCR lines to the Xcode console, which is the quickest
+way to see what Vision actually read before the parser touched it.
+
+The demo targets iOS 17. The package itself is iOS 16, but Thai recognition
+needs iOS 17, and the demo is set up to exercise that. Which languages are
+requested is configurable:
+
+```swift
+ReceiptOCR.Configuration(recognitionLanguages: ["en-US"])
+```
+
 ## Add it to an iOS app
 
 1. In Xcode, **File → Add Package Dependencies…** and enter

@@ -24,8 +24,13 @@ public struct ReceiptOCR {
 
     /// Tuning knobs for the underlying Vision request.
     public struct Configuration {
-        /// Restrict recognition to these BCP-47 language codes. `nil` lets the
-        /// system decide, which is usually right for receipts.
+        /// Thai first, then English. Vision only reads Thai when asked to, and
+        /// Thai needs iOS 17 / macOS 14; on older systems it is dropped and
+        /// recognition falls back to English.
+        public static let defaultRecognitionLanguages = ["th-TH", "en-US"]
+
+        /// Recognise these BCP-47 language codes, in priority order. `nil`
+        /// means Vision's default, which is English only.
         public var recognitionLanguages: [String]?
         /// Favour speed over accuracy — useful for live camera frames, where a
         /// second pass on a still image can follow.
@@ -36,7 +41,7 @@ public struct ReceiptOCR {
         public var minimumTextHeight: Float?
 
         public init(
-            recognitionLanguages: [String]? = nil,
+            recognitionLanguages: [String]? = Configuration.defaultRecognitionLanguages,
             preferSpeedOverAccuracy: Bool = false,
             usesLanguageCorrection: Bool = true,
             minimumTextHeight: Float? = nil
