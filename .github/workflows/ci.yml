@@ -81,6 +81,5 @@ jobs:
             -target ReceiptScannerDemo \
             -sdk iphonesimulator \
             -configuration Debug \
-            -derivedDataPath "$RUNNER_TEMP/DemoDerivedData" \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO
