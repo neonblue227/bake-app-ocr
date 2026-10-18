@@ -64,7 +64,10 @@ jobs:
   # The example app carries a real .xcodeproj, and an Xcode project nobody
   # compiles is a project that rots. Runs on macos-15 because the project is in
   # the Xcode 16 format (objectVersion 77, filesystem-synchronised groups).
-  # `-target` rather than `-scheme` because there is no checked-in shared scheme.
+  #
+  # Uses -scheme, not -target: building a single target does not wire up a Swift
+  # package dependency's module, so the app fails with "no such module
+  # 'BakeAppOCR'". That needs the checked-in shared scheme.
   demo-app:
     name: Example app build
     runs-on: macos-15
@@ -72,14 +75,16 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Xcode version
-        run: xcodebuild -version
+        run: |
+          xcodebuild -version
+          xcodebuild -list -project Examples/ReceiptScannerDemo/ReceiptScannerDemo.xcodeproj
 
       - name: Build ReceiptScannerDemo
         run: |
           xcodebuild build \
             -project Examples/ReceiptScannerDemo/ReceiptScannerDemo.xcodeproj \
-            -target ReceiptScannerDemo \
-            -sdk iphonesimulator \
-            -configuration Debug \
+            -scheme ReceiptScannerDemo \
+            -destination 'generic/platform=iOS Simulator' \
+            -derivedDataPath "$RUNNER_TEMP/DemoDerivedData" \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO
