@@ -25,7 +25,12 @@ struct Regex {
     }
 
     func replacingMatches(in string: String, with template: String) -> String {
-        expression.replacingMatches(in: string, options: [], range: string.fullRange, withTemplate: template)
+        expression.stringByReplacingMatches(
+            in: string,
+            options: [],
+            range: string.fullRange,
+            withTemplate: template
+        )
     }
 }
 
