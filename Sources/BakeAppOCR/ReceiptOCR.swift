@@ -6,6 +6,8 @@ import ImageIO
 public enum ReceiptOCRError: Error, Equatable {
     /// The file could not be decoded as an image.
     case unreadableImage(URL)
+    /// The image data could not be decoded.
+    case undecodableImageData
 }
 
 /// The entry point: image in, ``Receipt`` out.
@@ -75,6 +77,15 @@ public struct ReceiptOCR {
         return try scan(image: image)
     }
 
+    /// Parses image `Data`, for example a photo picker result.
+    public func scan(imageData data: Data) throws -> Receipt {
+        guard let source = CGImageSourceCreateWithData(data as CFData, nil),
+              let image = CGImageSourceCreateImageAtIndex(source, 0, nil) else {
+            throw ReceiptOCRError.undecodableImageData
+        }
+        return try scan(image: image)
+    }
+
     /// Parses receipt text you already have, skipping OCR entirely.
     ///
     /// Useful if you use a different recognition engine, or when the caller has
@@ -91,16 +102,7 @@ public extension ReceiptOCR {
     /// Runs OCR over a `UIImage`.
     func scan(image: UIImage) throws -> Receipt {
         guard let cgImage = image.cgImage else {
-            throw ReceiptOCRError.unreadableImage(URL(fileURLWithPath: "UIImage"))
-        }
-        return try scan(image: cgImage)
-    }
-
-    /// Loads an image from `Data`, for example a photo picker result.
-    func scan(imageData data: Data) throws -> Receipt {
-        guard let source = CGImageSourceCreateWithData(data as CFData, nil),
-              let cgImage = CGImageSourceCreateImageAtIndex(source, 0, nil) else {
-            throw ReceiptOCRError.unreadableImage(URL(fileURLWithPath: "imageData"))
+            throw ReceiptOCRError.undecodableImageData
         }
         return try scan(image: cgImage)
     }

@@ -24,8 +24,26 @@ jobs:
       - name: Test
         run: swift test
 
-  # The camera code is behind `#if os(iOS)`, so `swift build` on macOS skips it
-  # entirely. This job is what actually compiles it.
+      # Exercises the built inspector binary end to end, not just its types.
+      - name: Smoke-test the inspector CLI
+        run: |
+          swift run ReceiptInspector --help
+
+          summary="$(swift run ReceiptInspector --lines Tests/BakeAppOCRTests/Fixtures/cafe-order.txt)"
+          echo "$summary"
+          echo "$summary" | grep -q "10432" || {
+            echo "::error::expected order number 10432 in the summary"
+            exit 1
+          }
+
+          swift run ReceiptInspector --json --lines Tests/BakeAppOCRTests/Fixtures/cafe-order.txt \
+            | python3 -m json.tool > /dev/null
+
+          echo "Inspector CLI produced a valid summary and valid JSON."
+
+  # The camera code and the SwiftUI views are behind `#if os(iOS)` / `#if
+  # os(macOS)`, so a single `swift build` never compiles both. This job is what
+  # actually type-checks the iOS half.
   ios:
     name: iOS build
     runs-on: macos-14

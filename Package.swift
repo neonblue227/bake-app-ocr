@@ -9,9 +9,11 @@ let package = Package(
     ],
     products: [
         .library(name: "BakeAppOCR", targets: ["BakeAppOCR"]),
+        .executable(name: "ReceiptInspector", targets: ["ReceiptInspector"]),
     ],
     targets: [
         .target(name: "BakeAppOCR"),
+        .executableTarget(name: "ReceiptInspector", dependencies: ["BakeAppOCR"]),
         .testTarget(
             name: "BakeAppOCRTests",
             dependencies: ["BakeAppOCR"],

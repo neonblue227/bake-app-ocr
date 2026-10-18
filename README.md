@@ -23,6 +23,33 @@ receipt.subtotal, receipt.tax, receipt.total
 receipt.warnings                  // what the parser was unsure about
 ```
 
+## Try it in one command
+
+No app, no simulator, no Xcode project:
+
+```bash
+git clone https://github.com/neonblue227/bake-app-ocr.git
+cd bake-app-ocr
+swift run ReceiptInspector
+```
+
+That opens an inspector window. Drop in a receipt photo — or switch to
+**Pasted text** and paste the receipt text, which skips OCR and tests the parser
+directly. Either way you get the order number with its confidence, every item,
+the totals, any warnings, and the raw OCR lines side by side, so you can see
+exactly why a result came out the way it did.
+
+There is a **Copy summary** button that puts the parsed result *and* the raw OCR
+lines on your clipboard — that is what to send me when something reads wrong.
+
+The same tool runs headless, which is handy on a machine without a GUI:
+
+```bash
+swift run ReceiptInspector ~/Desktop/receipt.jpg           # summary
+swift run ReceiptInspector --json ~/Desktop/receipt.jpg    # JSON
+swift run ReceiptInspector --lines receipt.txt             # skip OCR entirely
+```
+
 ## Install
 
 The package has no dependencies, so you can either add it as a package
