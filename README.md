@@ -38,6 +38,57 @@ Platforms: iOS 16+, macOS 13+. The Vision and parsing layers use nothing newer
 than Vision itself, so lowering the floor is a one-line change in
 `Package.swift` if you need to.
 
+## Camera
+
+Two ready-made SwiftUI views. Both are iOS-only and both need
+`NSCameraUsageDescription` in your `Info.plist`.
+
+### Still capture — best accuracy
+
+```swift
+.fullScreenCover(isPresented: $isScanning) {
+    ReceiptCameraView { receipt in
+        self.receipt = receipt
+        isScanning = false
+    }
+}
+```
+
+Live preview, a shutter, and a torch toggle — dim light is the most common
+reason a receipt will not read. The captured frame goes through Vision's
+accurate pass, which reads a dense receipt far better than live frame analysis
+does.
+
+### Live scanning — for long receipts
+
+```swift
+LiveReceiptScannerView { receipt in
+    self.receipt = receipt
+}
+```
+
+Text is collected continuously as the user pans down the receipt, then parsed
+when they tap Done. Use this when the receipt is taller than the frame, since a
+single still only sees what is in view. Lines are ordered by when they were
+first recognised, so reading order holds as long as the user starts at the top.
+
+Live scanning is built on VisionKit's `DataScannerViewController`, which needs an
+A12 chip or later and **does not run in the Simulator** — use
+`ReceiptCameraView` with a `PhotosPicker` there.
+
+### Rolling your own camera UI
+
+```swift
+@StateObject private var camera = ReceiptCameraSession()
+
+await camera.start()                                  // skips asking twice
+let image = try await camera.capturePhoto()           // -> CGImage
+camera.setTorch(true)
+```
+
+`ReceiptCameraSession` publishes `state`, `isCapturing` and `isTorchOn` so you
+can drive your own controls, and exposes `session` for the preview layer.
+
 ## How it works
 
 Three layers, each independently testable:
@@ -156,7 +207,10 @@ Being explicit about what this does *not* do:
 - **English/Latin layouts only**, with decimal-point or decimal-comma money.
   The Vision language list is configurable via
   `ReceiptOCR.Configuration.recognitionLanguages`.
-- **No camera UI.** This is the OCR component only. Feed it a `CGImage`.
+- **The still camera reads only what is framed.** A receipt taller than the view
+  needs `LiveReceiptScannerView`, or two captures.
+- **Live scanning is order-sensitive.** Lines are ordered by when they were first
+  recognised, so panning from the bottom up will scramble them.
 - **An item with no description yields an empty name.** That is deliberate —
   it means "the price line had no text", not "the name is blank".
 - **Digit-confusion repair is not automatic.** Mapping `O` → `0` inside a value

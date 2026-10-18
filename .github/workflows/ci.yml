@@ -7,8 +7,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-and-test:
-    name: Build and test
+  macos:
+    name: macOS build and test
     runs-on: macos-14
     steps:
       - uses: actions/checkout@v4
@@ -23,3 +23,22 @@ jobs:
 
       - name: Test
         run: swift test
+
+  # The camera code is behind `#if os(iOS)`, so `swift build` on macOS skips it
+  # entirely. This job is what actually compiles it.
+  ios:
+    name: iOS build
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Available schemes
+        run: xcodebuild -list
+
+      - name: Build for iOS
+        run: |
+          xcodebuild build \
+            -scheme BakeAppOCR \
+            -destination 'generic/platform=iOS' \
+            -derivedDataPath "$RUNNER_TEMP/DerivedData" \
+            CODE_SIGNING_ALLOWED=NO
