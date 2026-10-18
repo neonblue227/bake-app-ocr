@@ -136,15 +136,24 @@ enum ReceiptSummary {
         return formatter
     }()
 
+    /// Quantities read better without trailing zeros: `2x`, not `2.00x`.
+    private static let plainQuantity: NumberFormatter = {
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .decimal
+        formatter.minimumFractionDigits = 0
+        formatter.maximumFractionDigits = 2
+        return formatter
+    }()
+
     static func money(_ value: Decimal?) -> String {
         guard let value else { return "-" }
         return currency.string(from: NSDecimalNumber(decimal: value)) ?? "\(value)"
     }
 
     static func quantity(_ item: ReceiptItem) -> String {
-        guard let quantity = item.quantity else { return "  - " }
-        let text = currency.string(from: NSDecimalNumber(decimal: quantity)) ?? "\(quantity)"
-        return String(format: "%@x", text)
+        guard let quantity = item.quantity else { return "-" }
+        let text = plainQuantity.string(from: NSDecimalNumber(decimal: quantity)) ?? "\(quantity)"
+        return "\(text)x"
     }
 
     static func percent(_ confidence: Double) -> String {
